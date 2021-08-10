@@ -1,0 +1,49 @@
+- hosts: namenode
+  tasks:
+  - name: "Copying the hadoop Software File"
+    copy:
+     src: "hadoop-1.2.1-1.x86_64.rpm"
+     dest: "/root/"
+     
+  - name: "Copying the Jdk Software File"
+    copy:
+     src: "jdk-8u171-linux-x64.rpm"
+     dest: "/root/"
+     
+  - name: "Installing Jdk"
+    shell: "rpm -ivh jdk-8u171-linux-x64.rpm"
+    register: Java
+    ignore_errors: yes
+    
+  - name: "Installing Hadoop"
+    shell: "rpm -ivh hadoop-1.2.1-1.x86_64.rpm  --force"
+    register: Hadoop
+    ignore_errors: yes
+ 
+  - name: "Copying the core-site.xml file"
+    copy:
+      src: "core-site.xml"
+      dest: "/etc/hadoop/core-site.xml"
+      
+  - name: "Copying the hdfs-site.xml file"
+    copy:
+      src: "namenode-hdfs-site.xml"
+      dest: "/etc/hadoop/hdfs-site.xml"
+     
+  - name: "Creating a directory"
+    file:
+      state: directory
+      path: "nn"
+      
+  - name: "Formatting Namenode"
+    shell: "echo Y |  hadoop namenode -format"
+    register: format
+
+  - name: "Starting the namenode"
+    shell: "hadoop-daemon.sh start namenode"
+    ignore_errors: yes
+    register: hadoop_started
+    
+  - name: "checking status of namenode"
+    shell: "jps"
+    register: jps
